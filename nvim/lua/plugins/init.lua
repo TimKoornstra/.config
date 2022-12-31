@@ -13,8 +13,7 @@ packer.startup {
         use { "olimorris/onedarkpro.nvim", config = get_config("onedarkpro") }
         use { "nvim-tree/nvim-web-devicons" }--, after = "onedarkpro.nvim" }
         use { "nvim-lualine/lualine.nvim", after = "nvim-web-devicons", config = get_config("lualine") }
-        use { "akinsho/bufferline.nvim", after = "nvim-web-devicons", config = get_config("bufferline") }
-        use {'romgrk/barbar.nvim', wants = 'nvim-web-devicons'}
+        use { "akinsho/bufferline.nvim", after = "nvim-web-devicons", ext = "bufferline" }
 
         -- Telescope
         use { "nvim-telescope/telescope.nvim", ext = "telescope-keymap", config = get_config("telescope") }

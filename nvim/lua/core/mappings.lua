@@ -9,26 +9,27 @@ map('n', '<C-l>', '<C-W>l')
 
 map('n', '<leader>gs', '<Cmd>SymbolsOutline<CR>')
 
--- Barbar
-vim.cmd("nnoremap <silent>    <A-,> <Cmd>BufferPrevious<CR>")
-vim.cmd("nnoremap <silent>    <A-.> <Cmd>BufferNext<CR>")
+-- Bufferline
+vim.cmd("nnoremap <silent>    <A-,> <Cmd>BufferLineCyclePrev<CR>")
+vim.cmd("nnoremap <silent>    <A-.> <Cmd>BufferLineCycleNext<CR>")
 -- Re-order to previous/next
-vim.cmd("nnoremap <silent>    <A-<> <Cmd>BufferMovePrevious<CR>")
-vim.cmd("nnoremap <silent>    <A->> <Cmd>BufferMoveNext<CR>")
+vim.cmd("nnoremap <silent>    <A-<> <Cmd>BufferLineMovePrev<CR>")
+vim.cmd("nnoremap <silent>    <A->> <Cmd>BufferLineMoveNext<CR>")
 -- Goto buffer in position...
-vim.cmd("nnoremap <silent>    <A-1> <Cmd>BufferGoto 1<CR>")
-vim.cmd("nnoremap <silent>    <A-2> <Cmd>BufferGoto 2<CR>")
-vim.cmd("nnoremap <silent>    <A-3> <Cmd>BufferGoto 3<CR>")
-vim.cmd("nnoremap <silent>    <A-4> <Cmd>BufferGoto 4<CR>")
-vim.cmd("nnoremap <silent>    <A-5> <Cmd>BufferGoto 5<CR>")
-vim.cmd("nnoremap <silent>    <A-6> <Cmd>BufferGoto 6<CR>")
-vim.cmd("nnoremap <silent>    <A-7> <Cmd>BufferGoto 7<CR>")
-vim.cmd("nnoremap <silent>    <A-8> <Cmd>BufferGoto 8<CR>")
-vim.cmd("nnoremap <silent>    <A-9> <Cmd>BufferGoto 9<CR>")
-vim.cmd("nnoremap <silent>    <A-0> <Cmd>BufferLast<CR>")
+map("n", "<A-1>", "<Cmd>BufferLineGoToBuffer 1<CR>")
+map("n", "<A-2>", "<Cmd>BufferLineGoToBuffer 2<CR>")
+map("n", "<A-3>", "<Cmd>BufferLineGoToBuffer 3<CR>")
+map("n", "<A-4>", "<Cmd>BufferLineGoToBuffer 4<CR>")
+map("n", "<A-5>", "<Cmd>BufferLineGoToBuffer 5<CR>")
+map("n", "<A-6>", "<Cmd>BufferLineGoToBuffer 6<CR>")
+map("n", "<A-7>", "<Cmd>BufferLineGoToBuffer 7<CR>")
+map("n", "<A-8>", "<Cmd>BufferLineGoToBuffer 8<CR>")
+map("n", "<A-9>", "<Cmd>BufferLineGoToBuffer 9<CR>")
+map("n", "<A-0>", "<Cmd>BufferLineGoToBuffer 10<CR>")
+-- Close buffer
+map("n", "<C-W>c", "<Cmd>BufferLinePickClose<CR>")
 
 -- Copilot
 vim.api.nvim_set_keymap('i', '<C-/>', 'copilot#Accept("<CR>")', {expr=true, silent=true})
 
---map('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>',{})
 -- Delete keymappings
