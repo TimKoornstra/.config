@@ -29,6 +29,9 @@ map("n", "<A-0>", "<Cmd>BufferLineGoToBuffer 10<CR>")
 -- Close buffer
 map("n", "<C-W>c", "<Cmd>BufferLinePickClose<CR>")
 
+-- WhichKey
+map("n", "<leader>?", "<Cmd>WhichKey<CR>")
+
 -- Copilot
 vim.api.nvim_set_keymap('i', '<C-/>', 'copilot#Accept("<CR>")', {expr=true, silent=true})
 

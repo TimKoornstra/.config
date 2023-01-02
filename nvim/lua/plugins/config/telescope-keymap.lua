@@ -11,7 +11,6 @@ local function mappings()
     keymap.set("n", "<leader>tC", "<cmd>Telescope colorscheme<cr>", { desc = "Colorscheme" })
     keymap.set("n", "<leader>tp", "<cmd>Telescope project<cr>", { desc = "Project" })
     keymap.set("n", "<Leader>tm", "<cmd>Telescope man_pages<cr>", { desc = "Man pages" })
-    keymap.set("n", "<Leader>tn", "<cmd>Telescope notify<cr>", { desc = "Notifications" })
 end
 
 mappings()

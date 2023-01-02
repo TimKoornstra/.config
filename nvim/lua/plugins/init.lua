@@ -14,7 +14,8 @@ packer.startup {
         use { "nvim-tree/nvim-web-devicons" }--, after = "onedarkpro.nvim" }
         use { "nvim-lualine/lualine.nvim", after = "nvim-web-devicons", config = get_config("lualine") }
         use { "akinsho/bufferline.nvim", after = "nvim-web-devicons", ext = "bufferline" }
-
+        use { 'goolord/alpha-nvim', after = "nvim-web-devicons", ext = "alpha-nvim" }
+        
         -- Telescope
         use { "nvim-telescope/telescope.nvim", ext = "telescope-keymap", config = get_config("telescope") }
         use { "nvim-telescope/telescope-project.nvim", after = "telescope.nvim", ext = "project" }
