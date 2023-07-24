@@ -1,6 +1,6 @@
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = { "sumneko_lua", "pylsp", "tsserver", "svelte" }
+    ensure_installed = { "lua_ls", "pylsp", "tsserver", "svelte" }
 })
 
 local on_attach = function(client, bufnr)
@@ -39,7 +39,7 @@ require("lspconfig")["pylsp"].setup {
     flags = lsp_flags,
 }
 
-require("lspconfig").sumneko_lua.setup {
+require("lspconfig").lua_ls.setup {
     on_attach = on_attach,
     flags = lsp_flags,
 }
