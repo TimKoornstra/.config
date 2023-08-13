@@ -9,8 +9,7 @@ local function mappings()
     keymap.set("n", "<leader>tb", "<cmd>Telescope buffers<cr>", { desc = "Buffers" })
     keymap.set("n", "<leader>th", "<cmd>Telescope help_tags<cr>", { desc = "Help tags" })
     keymap.set("n", "<leader>tC", "<cmd>Telescope colorscheme<cr>", { desc = "Colorscheme" })
-    keymap.set("n", "<leader>tp", "<cmd>Telescope project<cr>", { desc = "Project" })
-    keymap.set("n", "<Leader>tm", "<cmd>Telescope man_pages<cr>", { desc = "Man pages" })
+    keymap.set("n", "<Leader>td", "<cmd>Telescope diagnostics<cr>", { desc = "Diagnostics" })
 end
 
 mappings()

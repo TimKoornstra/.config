@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Except these files
+!.gitignore
+!README.md
+!LICENSE
+
+# Except these directories
+!*nvim/
+!*kitty/
