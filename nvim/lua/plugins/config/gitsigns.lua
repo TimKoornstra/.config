@@ -1,12 +1,12 @@
 local function config()
     require("gitsigns").setup {
         signs = {
-            add = { hl = "Green", text = "│" },
-            change = { hl = "Blue", text = "│" },
-            delete = { hl = "Red", text = "│" },
-            topdelete = { hl = "Red", text = "-" },
-            changedelete = { hl = "Red", text = "~" },
-            untracked = { hl = "Green", text = "│" },
+            add = { text = "│" },
+            change = { text = "│" },
+            delete = { text = "│" },
+            topdelete = { text = "-" },
+            changedelete = { text = "~" },
+            untracked = { text = "│" },
         },
         current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
         current_line_blame_opts = {

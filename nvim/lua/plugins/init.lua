@@ -30,7 +30,7 @@ packer.startup {
         use { "neovim/nvim-lspconfig", config = get_config("lsp_config") }
         use { "williamboman/mason.nvim" }
         use { "williamboman/mason-lspconfig.nvim" }
-        use { "j-hui/fidget.nvim", ext = "fidget" }
+        use { "j-hui/fidget.nvim", ext = "fidget", tag = "legacy" }
         use { "microsoft/python-type-stubs", opt = true }
         use { "lvimuser/lsp-inlayhints.nvim", branch = "anticonceal", ext = "lsp-inlayhints" }
         use { "theHamsta/nvim-semantic-tokens", ext = "nvim-semantic-tokens" }
