@@ -10,17 +10,17 @@ cmp.setup({
     },
     window = {
             documentation = {
-                border = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
+                border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
                 winhighlight = "Normal:Normal,FloatBorder:VertSplit,Search:None",
             },
             completion = {
-                border = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
+                border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
                 winhighlight = "Normal:Normal,FloatBorder:VertSplit,Search:None",
             },
         },
     mapping = cmp.mapping.preset.insert({
-      ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+        ["<C-d>"] = cmp.mapping.scroll_docs(4),
+        ["<C-u>"] = cmp.mapping.scroll_docs(-4),
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<CR>"] = cmp.mapping.confirm {
             behavior = cmp.ConfirmBehavior.Replace,
@@ -58,10 +58,34 @@ cmp.setup({
         ["<C-e>"] = { i = mapping.abort() },
     }),
     sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'luasnip' }, -- For luasnip users.
-    }, {
-      { name = 'buffer' },
+      {
+        name = "luasnip",
+        group_index = 1,
+        option = { use_show_condition = true },
+        entry_filter = function()
+          local context = require("cmp.config.context")
+          return not context.in_treesitter_capture("string")
+            and not context.in_syntax_group("String")
+        end,
+      },
+      {
+        name = "nvim_lsp",
+        group_index = 2,
+      },
+      {
+        name = "buffer",
+        keyword_length = 3,
+        group_index = 5,
+        option = {
+          get_bufnrs = function()
+            local bufs = {}
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              bufs[vim.api.nvim_win_get_buf(win)] = true
+            end
+            return vim.tbl_keys(bufs)
+          end,
+        },
+      },
     }),
     completion = { completeopt = "menu,menuone,noinsert" },
     experimental = {
@@ -95,3 +119,4 @@ cmp.setup.cmdline(":", {
             { name = "cmdline", keyword_length = 2 },
         },
     })
+    

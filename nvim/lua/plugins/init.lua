@@ -10,8 +10,8 @@ packer.startup {
         use { "nvim-lua/plenary.nvim" }
 
         -- Themes
-        use { "olimorris/onedarkpro.nvim", config = get_config("onedarkpro") }
-        use { "nvim-tree/nvim-web-devicons" }--, after = "onedarkpro.nvim" }
+        use { "navarasu/onedark.nvim", config = get_config("onedark") }
+        use { "nvim-tree/nvim-web-devicons" }
         use { "nvim-lualine/lualine.nvim", after = "nvim-web-devicons", config = get_config("lualine") }
         use { "akinsho/bufferline.nvim", after = "nvim-web-devicons", ext = "bufferline" }
         use { 'goolord/alpha-nvim', after = "nvim-web-devicons", ext = "alpha-nvim" }
@@ -25,6 +25,7 @@ packer.startup {
         -- Treesitter
         use { "nvim-treesitter/nvim-treesitter", event = { "BufRead", "BufNewFile" }, config = get_config("treesitter") }
         use { "nvim-treesitter/nvim-treesitter-textobjects", after = "nvim-treesitter" }
+        use { "nvim-treesitter/nvim-treesitter-context", after = "nvim-treesitter" }
 
         -- Lsp
         use { "neovim/nvim-lspconfig", config = get_config("lsp_config") }
@@ -44,16 +45,16 @@ packer.startup {
         
         -- Auto-complete
         use { "rafamadriz/friendly-snippets" }
-        use { "L3MON4D3/LuaSnip", after = "friendly-snippets", config = get_config("luasnip") }
+        use { "L3MON4D3/LuaSnip", tag = "v2.*", run = "make install_jsregexp", dependencies = { "rafamadriz/friendly-snippets" } }
         use { "hrsh7th/nvim-cmp", after = "LuaSnip", config = get_config("cmp_config"),
             requires = {
-            "saadparwaiz1/cmp_luasnip",
-            "hrsh7th/cmp-buffer",
-            "hrsh7th/cmp-nvim-lsp",
-            "hrsh7th/cmp-nvim-lua",
-            "hrsh7th/cmp-cmdline",
-            "hrsh7th/cmp-path",
-            "hrsh7th/cmp-nvim-lsp-signature-help",
+                "saadparwaiz1/cmp_luasnip",
+                "hrsh7th/cmp-buffer",
+                "hrsh7th/cmp-nvim-lsp",
+                "hrsh7th/cmp-nvim-lua",
+                "hrsh7th/cmp-cmdline",
+                "hrsh7th/cmp-path",
+                "hrsh7th/cmp-nvim-lsp-signature-help",
             } 
         }
         use { "github/copilot.vim" }
@@ -62,9 +63,16 @@ packer.startup {
         use { "stevearc/dressing.nvim", ext = "dressing" }
         use { "folke/which-key.nvim", config = get_config("whichkey") }
         use { "simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", ext = "symbols-outline" }
+        use({
+            "norcalli/nvim-colorizer.lua",
+            config = function()
+                require("colorizer").setup({ "*" })
+            end,
+        })
+        use { "RRethy/vim-illuminate" }        
 
-        -- Documents
-        use { "danymat/neogen", ext = "neogen" }        
+        -- Documentation
+        use { "danymat/neogen", ext = "neogen" }
         
         -- Commenter
         use { "preservim/nerdcommenter" }
@@ -72,6 +80,19 @@ packer.startup {
         -- Other
         use { "kylechui/nvim-surround", ext = "nvim-surround" }
         use { 'phaazon/hop.nvim', ext = "hop" }
+        use {
+            "windwp/nvim-autopairs",
+            event = "InsertEnter",
+            config = function()
+                require("nvim-autopairs").setup {}
+            end
+        }
+        use({
+            "iamcco/markdown-preview.nvim",
+            run = function()
+                vim.fn["mkdp#util#install"]()
+            end,
+        })
 
         install_sync()
     end,

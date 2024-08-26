@@ -4,6 +4,7 @@ return {
     end,
     config = function()
         require("neogen").setup {
+            snippet_engine = "luasnip",
             enabled = true,
             languages = {
                 python = {
