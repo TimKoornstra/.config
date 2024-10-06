@@ -1,3 +1,8 @@
+require("mason").setup()
+require("mason-lspconfig").setup({
+    ensure_installed = { "lua_ls", "pylsp", "ts_ls", "svelte" }
+})
+
 local fn = vim.fn
 local api = vim.api
 local keymap = vim.keymap
@@ -92,11 +97,13 @@ capabilities.textDocument.foldingRange = {
 local lspconfig = require("lspconfig")
 
 if utils.executable("pylsp") then
-  local venv_path = os.getenv('VIRTUAL_ENV')
+  local conda_prefix = os.getenv('CONDA_PREFIX')
   local py_path = nil
   -- decide which python executable to use for mypy
-  if venv_path ~= nil then
-    py_path = venv_path .. "/bin/python3"
+  if conda_prefix ~= nil then
+    py_path = conda_prefix .. "/bin/python3"
+  elseif os.getenv('VIRTUAL_ENV') ~= nil then
+    py_path = os.getenv('VIRTUAL_ENV') .. "/bin/python3"
   else
     py_path = vim.g.python3_host_prog
   end
@@ -111,7 +118,8 @@ if utils.executable("pylsp") then
           autopep8 = { enabled = true },
           yapf = { enabled = false },
           -- linter options
-          pylint = { enabled = true, executable = "pylint" },
+          pylint = { enabled = true,
+                     args = { "--disable=no-member" }},
           ruff = { enabled = false },
           pyflakes = { enabled = false },
           pycodestyle = { enabled = false },
@@ -138,7 +146,7 @@ else
   vim.notify("pylsp not found!", vim.log.levels.WARN, { title = "Nvim-config" })
 end
 
-if utils.executable("tsserver") then
+if utils.executable("ts_ls") then
     lspconfig.tsserver.setup {
         on_attach = custom_attach,
         flags = {
@@ -147,7 +155,7 @@ if utils.executable("tsserver") then
         capabilities = capabilities,
     }
 else
-  vim.notify("tsserver not found!", vim.log.levels.WARN, { title = "Nvim-config" })
+  vim.notify("ts_ls not found!", vim.log.levels.WARN, { title = "Nvim-config" })
 end
 
 -- global config for diagnostic

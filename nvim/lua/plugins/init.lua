@@ -79,7 +79,6 @@ packer.startup {
         
         -- Other
         use { "kylechui/nvim-surround", ext = "nvim-surround" }
-        use { 'phaazon/hop.nvim', ext = "hop" }
         use {
             "windwp/nvim-autopairs",
             event = "InsertEnter",
@@ -93,6 +92,7 @@ packer.startup {
                 vim.fn["mkdp#util#install"]()
             end,
         })
+        use { "smoka7/hop.nvim", ext = "hop" }
 
         install_sync()
     end,
