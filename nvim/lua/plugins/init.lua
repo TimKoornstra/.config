@@ -18,7 +18,6 @@ packer.startup {
         
         -- Telescope
         use { "nvim-telescope/telescope.nvim", ext = "telescope-keymap", config = get_config("telescope") }
-        use { "nvim-telescope/telescope-project.nvim", after = "telescope.nvim", ext = "project" }
         use { "nvim-telescope/telescope-media-files.nvim", after = "telescope.nvim" }
         use { "nvim-telescope/telescope-file-browser.nvim", after = "telescope.nvim" }
 
@@ -33,7 +32,6 @@ packer.startup {
         use { "williamboman/mason-lspconfig.nvim" }
         use { "j-hui/fidget.nvim", ext = "fidget", tag = "legacy" }
         use { "microsoft/python-type-stubs", opt = true }
-        use { "lvimuser/lsp-inlayhints.nvim", branch = "anticonceal", ext = "lsp-inlayhints" }
         use { "theHamsta/nvim-semantic-tokens", ext = "nvim-semantic-tokens" }
 
         -- git
