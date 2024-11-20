@@ -1,6 +1,9 @@
 local wk = require("which-key")
 
 wk.setup {
+    delay = function(ctx)
+      return 750
+    end,
     plugins = {
         marks = true,
         registers = true,
