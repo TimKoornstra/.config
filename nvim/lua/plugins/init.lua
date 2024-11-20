@@ -64,42 +64,19 @@ packer.startup {
         use { "lewis6991/gitsigns.nvim", ext = "gitsigns" }
         use { "sindrets/diffview.nvim", ext = "diffview" }
 
-        -- Avante plugin (AI-assisted coding)
-        use {
-            "yetone/avante.nvim",
-            build = "make",
-            requires = {
-                "nvim-treesitter/nvim-treesitter",
-                "stevearc/dressing.nvim",
-                "nvim-lua/plenary.nvim",
-                "MunifTanjim/nui.nvim",
-                "nvim-tree/nvim-web-devicons",
-                "zbirenbaum/copilot.lua",
-                {
-                    "HakonHarnes/img-clip.nvim",
-                    opts = {
-                        default = {
-                            embed_image_as_base64 = false,
-                            prompt_for_file_name = false,
-                            drag_and_drop = { insert_mode = true },
-                            use_absolute_path = true,
-                        },
-                    },
-                },
-                {
-                    'MeanderingProgrammer/render-markdown.nvim',
-                    config = function()
-                        require('render-markdown').setup({
-                            file_types = { "markdown", "Avante" },
-                        })
-                    end,
-                },
-            },
-            config = get_config("avante"),
-        }
+        -- AI-assisted coding
+        use { "github/copilot.vim" }
 
         -- Documentation
         use { "danymat/neogen", ext = "neogen" }
+        use {
+            'MeanderingProgrammer/render-markdown.nvim',
+            config = function()
+                require('render-markdown').setup({
+                    file_types = { "markdown", "Avante" },
+                })
+            end,
+        }
 
         -- Code manipulation
         use { "preservim/nerdcommenter" }

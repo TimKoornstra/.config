@@ -119,8 +119,8 @@ if utils.executable("pylsp") then
           yapf = { enabled = false },
           -- linter options
           pylint = { enabled = true,
+          	     executable = "pylint",
                      args = { "--disable=no-member" }},
-          ruff = { enabled = false },
           pyflakes = { enabled = false },
           pycodestyle = { enabled = false },
           -- type checker
@@ -146,8 +146,8 @@ else
   vim.notify("pylsp not found!", vim.log.levels.WARN, { title = "Nvim-config" })
 end
 
-if utils.executable("ts_ls") then
-    lspconfig.tsserver.setup {
+if utils.executable("tsserver") then
+    lspconfig.ts_ls.setup {
         on_attach = custom_attach,
         flags = {
           debounce_text_changes = 200,
