@@ -23,6 +23,7 @@ packer.startup {
         use { "simrat39/symbols-outline.nvim", cmd = "SymbolsOutline", ext = "symbols-outline" }
         use { "norcalli/nvim-colorizer.lua", config = function() require("colorizer").setup({ "*" }) end }
         use { "RRethy/vim-illuminate" }
+        use { "lukas-reineke/indent-blankline.nvim", ext = "indent-blankline" }
 
         -- File explorer
         use { "nvim-tree/nvim-tree.lua", config = get_config("nvim-tree"), ext = "nvim-tree-settings"}

@@ -5,6 +5,7 @@
 !.gitignore
 !README.md
 !LICENSE
+!.tmux.conf
 
 # Except these directories
 !*nvim/
