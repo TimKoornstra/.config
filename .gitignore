@@ -5,13 +5,14 @@
 !.gitignore
 !README.md
 !LICENSE
-!.tmux.conf
 
 # Except these directories
 !*nvim/
 !*nvim/**
 !*kitty/
 !*kitty/**
+!*tmux/
+!*tmux/**
 
 # But ignore the compiled packer file
 nvim/plugin/packer_compiled.lua
