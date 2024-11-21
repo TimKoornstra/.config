@@ -6,6 +6,7 @@ This repository contains configuration files for various tools and applications 
 
 1. [Neovim Configuration](#neovim-configuration)
 2. [Kitty Terminal Configuration](#kitty-terminal-configuration)
+3. [Tmux Configuration](#tmux-configuration)
 
 ---
 
@@ -196,6 +197,40 @@ Kitty is a fast, feature-rich, GPU-based terminal emulator. It's designed to be 
 ### Usage
 
 Open Kitty by typing `kitty` in your terminal.
+
+---
+
+## Tmux Configuration
+
+### About
+
+Tmux is a terminal multiplexer that allows you to run multiple terminal sessions in a single window.
+
+### Installation
+
+1. **Install Tmux**:
+   ```bash
+   sudo apt install tmux
+   ```
+
+2. **Clone Configuration**:
+   ```bash
+   git clone git@github.com:TimKoornstra/.config.git ~/.config
+   ```
+
+3. **Source Configuration**:
+   Start a `tmux` session and source the configuration file:
+   ```bash
+   tmux
+   tmux source-file ~/.config/tmux/tmux.conf
+   ```
+
+### Usage
+
+Open Tmux by typing `tmux` in your terminal. Use the following keybindings to navigate and manage Tmux sessions:
+
+- **Prefix**: `Ctrl + \`
+- The rest of the keybindings remain unchanged from the default Tmux configuration.
 
 ---
 
