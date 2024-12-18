@@ -65,9 +65,6 @@ packer.startup {
         use { "lewis6991/gitsigns.nvim", ext = "gitsigns" }
         use { "sindrets/diffview.nvim", ext = "diffview" }
 
-        -- AI-assisted coding
-        use { "github/copilot.vim" }
-
         -- Documentation
         use { "danymat/neogen", ext = "neogen" }
         use {
