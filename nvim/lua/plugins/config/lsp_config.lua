@@ -1,172 +1,191 @@
-require("mason").setup()
-require("mason-lspconfig").setup({
-    ensure_installed = { "lua_ls", "pylsp", "ts_ls", "svelte" }
-})
+-- Helper function to get python path
+local function get_python_path()
+  local conda_prefix = os.getenv('CONDA_PREFIX')
+  local venv_prefix = os.getenv('VIRTUAL_ENV')
 
-local fn = vim.fn
-local api = vim.api
-local keymap = vim.keymap
-local lsp = vim.lsp
-local diagnostic = vim.diagnostic
-
-local utils = require("core.utils")
-
--- set quickfix list from diagnostics in a certain buffer, not the whole workspace
-local set_qflist = function(buf_num, severity)
-  local diagnostics = nil
-  diagnostics = diagnostic.get(buf_num, { severity = severity })
-
-  local qf_items = diagnostic.toqflist(diagnostics)
-  vim.fn.setqflist({}, ' ', { title = 'Diagnostics', items = qf_items })
-
-  -- open quickfix by default
-  vim.cmd[[copen]]
-end
-
-local custom_attach = function(client, bufnr)
-  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-  
-  -- Mappings.
-  local map = function(mode, l, r, opts)
-    opts = opts or {}
-    opts.silent = true
-    opts.buffer = bufnr
-    keymap.set(mode, l, r, opts)
-  end
-
-  map('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', {})
-  map('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', {})
-
-  map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', {})
-  map('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', {})
-  map('n', 'gr', require('telescope.builtin').lsp_references, {})
-  map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', {})
-
-  -- Set some key bindings conditional on server capabilities
-  if client.server_capabilities.documentFormattingProvider then
-    map("n", "<leader>fm", vim.lsp.buf.format, { desc = "format code" })
-    vim.cmd(
-            [[
-                augroup LspFormatting
-                autocmd! * <buffer>
-                autocmd BufWritePre <buffer> lua vim.lsp.buf.format()
-                augroup END
-                ]]
-        )
-  end
-
-  api.nvim_create_autocmd("CursorHold", {
-    buffer = bufnr,
-    callback = function()
-      local float_opts = {
-        focusable = false,
-        close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-        border = "rounded",
-        source = "always", -- show source in diagnostic popup window
-        prefix = " ",
-      }
-
-      if not vim.b.diagnostics_pos then
-        vim.b.diagnostics_pos = { nil, nil }
-      end
-
-      local cursor_pos = api.nvim_win_get_cursor(0)
-      if (cursor_pos[1] ~= vim.b.diagnostics_pos[1] or cursor_pos[2] ~= vim.b.diagnostics_pos[2])
-          and #diagnostic.get() > 0
-      then
-        diagnostic.open_float(nil, float_opts)
-      end
-
-      vim.b.diagnostics_pos = cursor_pos
-    end,
-  })
-
-  if vim.g.logging_level == "debug" then
-    local msg = string.format("Language server %s started!", client.name)
-    vim.notify(msg, vim.log.levels.DEBUG, { title = "Nvim-config" })
+  if conda_prefix then
+    return conda_prefix .. "/bin/python3"
+  elseif venv_prefix then
+    return venv_prefix .. "/bin/python3"
+  else
+    return vim.g.python3_host_prog
   end
 end
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
--- required by nvim-ufo
-capabilities.textDocument.foldingRange = {
-    dynamicRegistration = false,
-    lineFoldingOnly = true
+-- Enhanced keybindings setup
+local function setup_keybindings(bufnr)
+  local bufopts = { noremap = true, silent = true, buffer = bufnr }
+  local map = vim.keymap.set
+
+  -- Navigation
+  map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", bufopts)
+  map("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
+  map("n", "gr", require("telescope.builtin").lsp_references, bufopts)
+  map("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
+  map("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", bufopts)
+
+  -- Documentation
+  map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", bufopts)
+  map("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", bufopts)
+
+  -- Refactoring
+  map("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", bufopts)
+  map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", bufopts)
+
+  -- Diagnostics
+  map("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float()<CR>", bufopts)
+  map("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>", bufopts)
+  map("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>", bufopts)
+  map("n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", bufopts)
+
+  -- Workspace
+  map("n", "<leader>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
+  map("n", "<leader>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
+  map("n", "<leader>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", bufopts)
+end
+
+-- Configure border style
+local border = {
+  { "╭", "FloatBorder" },
+  { "─", "FloatBorder" },
+  { "╮", "FloatBorder" },
+  { "│", "FloatBorder" },
+  { "╯", "FloatBorder" },
+  { "─", "FloatBorder" },
+  { "╰", "FloatBorder" },
+  { "│", "FloatBorder" },
 }
 
-local lspconfig = require("lspconfig")
+-- Common LSP setup function
+local function make_config()
+  local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-if utils.executable("pylsp") then
-  local conda_prefix = os.getenv('CONDA_PREFIX')
-  local py_path = nil
-  -- decide which python executable to use for mypy
-  if conda_prefix ~= nil then
-    py_path = conda_prefix .. "/bin/python3"
-  elseif os.getenv('VIRTUAL_ENV') ~= nil then
-    py_path = os.getenv('VIRTUAL_ENV') .. "/bin/python3"
-  else
-    py_path = vim.g.python3_host_prog
-  end
+  -- Configure LSP handlers with borders
+  local handlers = {
+    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
+    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
+  }
 
-  lspconfig.pylsp.setup {
-    on_attach = custom_attach,
-    settings = {
-      pylsp = {
-        plugins = {
-          -- formatter options
-          black = { enabled = false },
-          autopep8 = { enabled = true },
-          yapf = { enabled = false },
-          -- linter options
-          pylint = { enabled = true,
-          	     executable = "pylint",
-                     args = { "--disable=no-member" }},
-          pyflakes = { enabled = false },
-          pycodestyle = { enabled = false },
-          -- type checker
-          pylsp_mypy = {
-            enabled = true,
-            overrides = { "--python-executable", py_path, true },
-            report_progress = true,
-            live_mode = false
-          },
-          -- auto-completion options
-          jedi_completion = { fuzzy = true },
-          -- import sorting
-          isort = { enabled = true },
-        },
-      },
-    },
+  -- Configure diagnostic style
+  vim.diagnostic.config({
+    float = { border = border },
+    virtual_text = true,
+    signs = true,
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+  })
+
+  return {
+    capabilities = capabilities,
+    handlers = handlers,
     flags = {
       debounce_text_changes = 200,
     },
-    capabilities = capabilities,
+    on_attach = function(client, bufnr)
+      setup_keybindings(bufnr)
+
+      -- Enable formatting on save if the client supports it
+      if client.server_capabilities.documentFormattingProvider then
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({ bufnr = bufnr })
+          end,
+        })
+      end
+    end
   }
-else
-  vim.notify("pylsp not found!", vim.log.levels.WARN, { title = "Nvim-config" })
 end
 
-if utils.executable("tsserver") then
-    lspconfig.ts_ls.setup {
-        on_attach = custom_attach,
-        flags = {
-          debounce_text_changes = 200,
+local function setup_lspconfig()
+  local lspconfig = require("lspconfig")
+  local base_config = make_config()
+
+  -- Python LSP configuration
+  lspconfig.pylsp.setup(vim.tbl_deep_extend("force", base_config, {
+    settings = {
+      pylsp = {
+        plugins = {
+          -- Formatting
+          black = { enabled = false },
+          autopep8 = { enabled = true },
+          yapf = { enabled = false },
+
+          -- Linting
+          pylint = {
+            enabled = true,
+            executable = "pylint",
+            args = {
+              "--disable=no-member",
+              "--disable=C0111", -- Missing docstring
+              "--disable=C0103", -- Invalid name
+            }
+          },
+          pyflakes = { enabled = false },
+          pycodestyle = { enabled = false },
+
+          -- Type checking
+          pylsp_mypy = {
+            enabled = true,
+            overrides = { "--python-executable", get_python_path(), true },
+            report_progress = true,
+            live_mode = false,
+            strict = true
+          },
+
+          -- Completion
+          jedi_completion = {
+            fuzzy = true,
+            include_params = true
+          },
+
+          -- Import sorting
+          isort = { enabled = true },
+
+          -- Additional features
+          rope_completion = { enabled = true },
+          rope_autoimport = { enabled = true }
         },
-        capabilities = capabilities,
+      },
+    },
+  }))
+
+  -- TypeScript LSP configuration
+  lspconfig.ts_ls.setup(vim.tbl_deep_extend("force", base_config, {
+    settings = {
+      typescript = {
+        inlayHints = {
+          includeInlayParameterNameHints = 'all',
+          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+          includeInlayFunctionParameterTypeHints = true,
+          includeInlayVariableTypeHints = true,
+          includeInlayPropertyDeclarationTypeHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          includeInlayEnumMemberValueHints = true,
+        }
+      }
     }
-else
-  vim.notify("ts_ls not found!", vim.log.levels.WARN, { title = "Nvim-config" })
+  }))
+
+  -- Lua LSP configuration
+  lspconfig.lua_ls.setup(vim.tbl_deep_extend("force", base_config, {
+    settings = {
+      Lua = {
+        diagnostics = {
+          globals = { 'vim' }
+        },
+        workspace = {
+          library = vim.api.nvim_get_runtime_file("", true),
+          checkThirdParty = false,
+        },
+        telemetry = {
+          enable = false,
+        },
+      },
+    },
+  }))
 end
 
--- global config for diagnostic
-diagnostic.config {
-  underline = false,
-  virtual_text = true,
-  signs = true,
-  severity_sort = true,
-}
-
--- Change border of documentation hover window, See https://github.com/neovim/neovim/pull/13998.
-lsp.handlers["textDocument/hover"] = lsp.with(vim.lsp.handlers.hover, {
-  border = "rounded",
-})
+-- Call the setup function
+setup_lspconfig()
