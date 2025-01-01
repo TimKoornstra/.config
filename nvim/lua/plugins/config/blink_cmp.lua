@@ -24,7 +24,7 @@ local function setup_blink_cmp()
           return ctx.mode ~= "cmdline" or not vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
         end,
       },
-      documentation = { window = { border = 'single' } },
+      documentation = { window = { border = 'single' }, auto_show = true },
       list = {
         selection = function(ctx)
           return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'

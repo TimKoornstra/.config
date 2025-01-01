@@ -44,31 +44,39 @@ local function setup_keybindings(bufnr)
   map("n", "<leader>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", bufopts)
 end
 
--- Configure border style
-local border = {
-  { "╭", "FloatBorder" },
-  { "─", "FloatBorder" },
-  { "╮", "FloatBorder" },
-  { "│", "FloatBorder" },
-  { "╯", "FloatBorder" },
-  { "─", "FloatBorder" },
-  { "╰", "FloatBorder" },
-  { "│", "FloatBorder" },
-}
+-- From: https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization#show-line-diagnostics-automatically-in-hover-window
+local function setup_diagnostics(bufnr)
+  vim.api.nvim_create_autocmd("CursorHold", {
+    buffer = bufnr,
+    callback = function()
+      local float_opts = {
+        focusable = false,
+        close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+        border = "rounded",
+        source = "always", -- show source in diagnostic popup window
+        prefix = " ",
+        scope = 'cursor',
+      }
+
+      vim.diagnostic.open_float(nil, float_opts)
+    end,
+  })
+end
 
 -- Common LSP setup function
 local function make_config()
   local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-  -- Configure LSP handlers with borders
-  local handlers = {
-    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
-    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
-  }
+  local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+  function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+    opts = opts or {}
+    opts.border = opts.border or 'rounded'
+    return orig_util_open_floating_preview(contents, syntax, opts, ...)
+  end
 
   -- Configure diagnostic style
   vim.diagnostic.config({
-    float = { border = border },
+    float = { border = 'rounded' },
     virtual_text = true,
     signs = true,
     underline = true,
@@ -78,12 +86,12 @@ local function make_config()
 
   return {
     capabilities = capabilities,
-    handlers = handlers,
     flags = {
       debounce_text_changes = 200,
     },
     on_attach = function(client, bufnr)
       setup_keybindings(bufnr)
+      setup_diagnostics(bufnr)
 
       -- Enable formatting on save if the client supports it
       if client.server_capabilities.documentFormattingProvider then
@@ -109,18 +117,18 @@ local function setup_lspconfig()
         plugins = {
           -- Formatting
           black = { enabled = false },
-          autopep8 = { enabled = true },
+          autopep8 = { enabled = false },
           yapf = { enabled = false },
 
           -- Linting
           pylint = {
-            enabled = true,
+            enabled = false,
             executable = "pylint",
             args = {
               "--disable=no-member",
               "--disable=C0111", -- Missing docstring
               "--disable=C0103", -- Invalid name
-            }
+            },
           },
           pyflakes = { enabled = false },
           pycodestyle = { enabled = false },
@@ -141,7 +149,7 @@ local function setup_lspconfig()
           },
 
           -- Import sorting
-          isort = { enabled = true },
+          isort = { enabled = false },
 
           -- Additional features
           rope_completion = { enabled = true },
@@ -169,14 +177,7 @@ local function setup_lspconfig()
   }))
 
   -- ESLint LSP configuration
-  lspconfig.eslint.setup({
-    on_attach = function(client, bufnr)
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        buffer = bufnr,
-        command = "EslintFixAll",
-      })
-    end,
-  })
+  lspconfig.eslint.setup({ base_config })
 
   -- Lua LSP configuration
   lspconfig.lua_ls.setup(vim.tbl_deep_extend("force", base_config, {
@@ -195,6 +196,26 @@ local function setup_lspconfig()
       },
     },
   }))
+
+  -- Ruff LSP configuration
+  require('lspconfig').ruff.setup({
+    init_options = {
+      settings = {
+        lint = {
+          select = {
+            "F",      -- pyflakes
+            "E", "W", -- pycodestyle
+            "PL",     -- pylint
+            "I",      -- isort
+          },
+          ignore = {
+            "E501", "E741", "F402", "F823", "PLR0913", "PLR0911",
+            "PLR0912", "PLR0915", "PLW2901", "PLW0603"
+          },
+        },
+      }
+    }
+  })
 end
 
 -- Call the setup function
