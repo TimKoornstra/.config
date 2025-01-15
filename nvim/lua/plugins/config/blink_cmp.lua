@@ -26,9 +26,11 @@ local function setup_blink_cmp()
       },
       documentation = { window = { border = 'single' }, auto_show = true },
       list = {
-        selection = function(ctx)
-          return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'
-        end
+        selection =
+        {
+          preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
+          auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
+        }
       }
     },
 

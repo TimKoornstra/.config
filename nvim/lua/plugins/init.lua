@@ -41,6 +41,11 @@ packer.startup {
       config = function() require("colorizer").setup({ "*" }) end
     }
     use { "RRethy/vim-illuminate" }
+    use {
+      "folke/snacks.nvim",
+      after = "nvim-web-devicons",
+      config = get_config("snacks")
+    }
 
     -- Telescope
     use {
