@@ -5,7 +5,6 @@ local function setup_blink_cmp()
     -- Keymap preset: 'default', 'super-tab', or 'enter'
     keymap = {
       preset = 'enter',
-      ["<CR>"] = { "accept_and_enter" }
     },
 
     appearance = {
