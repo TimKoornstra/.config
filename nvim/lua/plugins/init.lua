@@ -37,7 +37,7 @@ packer.startup {
       config = get_config("whichkey")
     }
     use {
-      "norcalli/nvim-colorizer.lua",
+      "catgoose/nvim-colorizer.lua",
       config = function() require("colorizer").setup({ "*" }) end
     }
     use { "RRethy/vim-illuminate" }
@@ -79,6 +79,11 @@ packer.startup {
       "nvim-treesitter/nvim-treesitter-context",
       after = "nvim-treesitter",
       requires = "nvim-treesitter/nvim-treesitter",
+      config = function()
+        require("treesitter-context").setup({
+          multiline_threshold = 3,
+        })
+      end,
     }
 
     -- LSP and completion
@@ -128,17 +133,11 @@ packer.startup {
 
     ---- Code manipulation
     use { "preservim/nerdcommenter" }
-    use {
-      "kylechui/nvim-surround",
-      tag = "*",
-      config = function()
-        require("nvim-surround").setup({})
-      end
-    }
+
     use {
       "windwp/nvim-autopairs",
       event = "InsertEnter",
-      config = function() require("nvim-autopairs").setup {} end
+      config = function() require("nvim-autopairs").setup {} end,
     }
 
     -- Buffer navigation

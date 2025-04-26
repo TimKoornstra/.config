@@ -3,7 +3,10 @@ local function setup_blink_cmp()
 
   blink_cmp.setup {
     -- Keymap preset: 'default', 'super-tab', or 'enter'
-    keymap = { preset = 'enter' },
+    keymap = {
+      preset = 'enter',
+      ["<CR>"] = { "accept_and_enter" }
+    },
 
     appearance = {
       -- Fallback to nvim-cmp's highlight groups for better theme compatibility
@@ -31,6 +34,9 @@ local function setup_blink_cmp()
           preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
           auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
         }
+      },
+      accept = {
+        dot_repeat = true,
       }
     },
 
@@ -38,6 +44,24 @@ local function setup_blink_cmp()
       enabled = true,
       window = { border = 'single' },
     },
+
+    fuzzy = { implementation = "prefer_rust_with_warning" },
+
+    cmdline = {
+      keymap = {
+        -- recommended, as the default keymap will only show and select the next item
+        ['<Tab>'] = { 'show', 'accept' },
+      },
+      completion = {
+        menu = {
+          auto_show = function(ctx)
+            return vim.fn.getcmdtype() == ':'
+            -- enable for inputs as well, with:
+            -- or vim.fn.getcmdtype() == '@'
+          end,
+        },
+      }
+    }
   }
 end
 
