@@ -15,6 +15,10 @@
 !*tmux/**
 !*scripts/
 !*scripts/**
+!*zsh/
+!*zsh/**
+!*hypr/
+!*hypr/**
 
 # But ignore the compiled packer file
 nvim/plugin/packer_compiled.lua

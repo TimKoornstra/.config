@@ -1,185 +1,203 @@
 # My `.config` Configuration Files
 
-This repository contains configuration files for various tools and applications I use on a daily basis. Here you will find setup instructions and my configurations for both `neovim` and the `kitty` terminal.
+This repository contains configuration files for various tools and applications I use on a daily basis. Here you will find setup instructions and my configurations for `neovim`, the `kitty` terminal, `tmux`, `hyprland`, and `zsh`.
 
 ## Table of Contents
 
-1. [Neovim Configuration](#neovim-configuration)
-2. [Kitty Terminal Configuration](#kitty-terminal-configuration)
-3. [Tmux Configuration](#tmux-configuration)
+1. [System Requirements](#system-requirements)
+2. [Setup Instructions](#setup-instructions)
+3. [Neovim Configuration](#neovim-configuration)
+4. [Kitty Terminal Configuration](#kitty-terminal-configuration)
+5. [Tmux Configuration](#tmux-configuration)
+6. [Hyprland Configuration](#hyprland-configuration)
+7. [Zsh Configuration](#zsh-configuration)
+8. [Contributing](#contributing)
 
 ---
 
-### Prerequisites
+## System Requirements
 
-Before proceeding with the Neovim setup, ensure that you have a Nerd font installed. Nerd fonts are required for specific plugins and icon themes to render correctly.
+Before proceeding with the setup, ensure that you have a Nerd font installed. Nerd fonts are required for specific plugins and icon themes to render correctly.
 
 [Nerd Fonts Website](https://www.nerdfonts.com/)
 
+You also need basic tools:
+
+* `git`
+* `curl`
+* `zsh` (for shell config)
+* `tmux` (for terminal multiplexing)
+* `neovim`
+* `kitty`
+* `hyprland` (Wayland compositor, only on Arch-based distros)
+
+## Setup Instructions
+
+1. **Install dependencies:**
+
+   **Arch Linux:**
+
+   ```bash
+   sudo pacman -S git curl zsh tmux neovim kitty hyprland
+   ```
+
+   **Ubuntu:**
+
+   ```bash
+   sudo apt install git curl zsh tmux neovim kitty
+   ```
+
+   *Note: Hyprland is not officially supported on Ubuntu.*
+
+2. **Clone this repo and run the setup script:**
+
+   > 🛑 **Important:** Do not clone directly into `~/.config` if it already exists — it may overwrite your existing configs.
+
+   ```bash
+   git clone git@github.com:TimKoornstra/.config.git ~/dotfiles
+   cd ~/dotfiles
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+
+This will:
+
+* Move all config folders into `~/.config`
+* Move the Git repository into `~/.config` (so you can run `git pull` there)
+* Create symlinks for `.zshrc` and `.p10k.zsh` in your home directory
+
+To update configs later:
+
+```bash
+cd ~/.config
+git pull
+```
+
+---
+
 ## Neovim Configuration
 
-### About
+Neovim is a hyperextensible text editor based on Vim.
 
-Neovim is a hyperextensible text editor based on Vim. It strives to improve upon Vim by adding new features and making it easier to integrate with other software.
+### Plugin Installation
 
-### Installation
+1. **Install Packer**:
 
-1. **Install Neovim**:  
-   Go to the most recent [Neovim release](https://github.com/neovim/neovim/releases) and follow the instructions for your operating system.
-
-2. **Install Packer**:  
-   You can install `packer` on Unix systems by running this command:
    ```bash
    git clone --depth 1 https://github.com/wbthomason/packer.nvim \
        ~/.local/share/nvim/site/pack/packer/start/packer.nvim
    ```
-   More installation options are listed in the [official repo](https://github.com/wbthomason/packer.nvim).
 
-3. **Clone Configuration**:  
-   ```bash
-   git clone git@github.com:TimKoornstra/.config.git ~/.config
-   ```
-
-4. **Install Plugins using Packer**:  
+2. **Install Plugins using Packer**:
    Launch Neovim and run:
+
    ```bash
    :PackerSync
    ```
+
    Restart Neovim and/or run `:PackerCompile` if needed.
 
-5. **Install Treesitter Languages**:  
-   In Neovim, run:
+3. **Install Treesitter Languages**:
+
    ```bash
    :TSUpdateSync
    ```
 
-   The config automatically ensures certain Treesitter parsers are installed.
+4. **Install LSP Servers**:
+   Open the Mason UI:
 
-6. **Install LSP Servers**:  
-   Use `mason.nvim` to manage and install LSP servers, linters, and formatters. Open the Mason UI:
    ```bash
    :Mason
    ```
 
-   From the UI, you can search and install tools like:
+   Or run:
 
-   - **LSP Servers**:
-     ```bash
-     :MasonInstall pylsp tsserver ruff
-     ```
-   - **Linters/Formatters**:
-     ```bash
-     :MasonInstall pylint isort autopep8 ruff
-     ```
-
-   You can also install everything in one command:
    ```bash
    :MasonInstall pylsp tsserver ruff-lsp pylint isort autopep8 ruff
    ```
 
 ### Usage
 
-Open Neovim by typing `nvim` in your terminal.
-
-### Using Telescope:
-- Press `<leader>tf` to find files.
-- Press `<leader>tg` for live grep.
-- Press `<leader>tb` for buffer list.
-- Press `<leader>to` for recently opened files.
-
-### Navigating with LSP:
-- `gd` to jump to definition.
-- `gr` to list references (Telescope).
-- `K` to hover documentation.
-- `<leader>rn` to rename symbols.
-
-### Git Integrations:
-- `:Gitsigns toggle_current_line_blame` to toggle inline blame.
-- `:DiffviewOpen` to open Git diffs in a side-by-side layout.
-- `:DiffviewToggle` bound to `<leader>D`.
-
-### Treesitter:
-- Enhanced syntax highlighting.
-- Incremental selection (use `gnn`, `grn`, `grm`, etc.).
-
-
-### Plugins
-
-This Neovim configuration includes a robust set of plugins to enhance functionality, productivity, and the user experience. Here's a detailed overview:
-
-| Category                     | Plugins                                                                     |
-|-----------------------------|-----------------------------------------------------------------------------|
-| **Package Manager**         | [packer.nvim](https://github.com/wbthomason/packer.nvim)                    |
-| **Core Dependency**         | [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)                    |
-| **UI & Themes**             | [onedark.nvim](https://github.com/navarasu/onedark.nvim), [nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons), [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim), [alpha-nvim](https://github.com/goolord/alpha-nvim), [which-key.nvim](https://github.com/folke/which-key.nvim), [dressing.nvim](https://github.com/stevearc/dressing.nvim), [nvim-colorizer.lua](https://github.com/norcalli/nvim-colorizer.lua), [vim-illuminate](https://github.com/RRethy/vim-illuminate) |
-| **Fuzzy Finder**            | [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim), (https://github.com/nvim-telescope/telescope-media-files.nvim), [telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim)|
-| **Syntax & Parsing**        | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter), [nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects), [nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context) |
-| **LSP & Completion**        | [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig), [mason.nvim](https://github.com/williamboman/mason.nvim), [mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim), [blink.cmp](https://github.com/Saghen/blink.cmp), [friendly-snippets](https://github.com/rafamadriz/friendly-snippets) |
-| **Git**                     | [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim), [diffview.nvim](https://github.com/sindrets/diffview.nvim)                                            |
-| **Documentation**           | [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)                                            |
-| **Code Manipulation**       | [nerdcommenter](https://github.com/preservim/nerdcommenter), [nvim-surround](https://github.com/kylechui/nvim-surround), [nvim-autopairs](https://github.com/windwp/nvim-autopairs)                          |
-| **Navigation**              | [flash.nvim](https://github.com/folke/flash.nvim)                                                                |
+* `nvim` to start Neovim
+* `<leader>tf` to find files
+* `<leader>tg` for live grep
+* `<leader>rn` to rename symbols, `K` to hover docs, etc.
 
 ---
 
 ## Kitty Terminal Configuration
 
-### About
-
-Kitty is a fast, feature-rich, GPU-based terminal emulator. It's designed to be lightweight and easily extensible.
-
-### Installation
-
-1. **Install Kitty**:
-   ```bash
-   sudo apt install kitty
-   ```
-
-2. **Clone Configuration**:
-   ```bash
-   git clone git@github.com:TimKoornstra/.config.git ~/.config
-   ```
+Kitty is a GPU-based terminal emulator.
 
 ### Usage
 
-Open Kitty by typing `kitty` in your terminal.
+Launch with:
+
+```bash
+kitty
+```
 
 ---
 
 ## Tmux Configuration
 
-### About
-
-Tmux is a terminal multiplexer that allows you to run multiple terminal sessions in a single window.
-
-### Installation
-
-1. **Install Tmux**:
-   ```bash
-   sudo apt install tmux
-   ```
-
-2. **Clone Configuration**:
-   ```bash
-   git clone git@github.com:TimKoornstra/.config.git ~/.config
-   ```
-
-3. **Source Configuration**:
-   Start a `tmux` session and source the configuration file:
-   ```bash
-   tmux
-   tmux source-file ~/.config/tmux/tmux.conf
-   ```
+Tmux allows you to split and manage terminal sessions.
 
 ### Usage
 
-Open Tmux by typing `tmux` in your terminal. Use the following keybindings to navigate and manage Tmux sessions:
+Launch with:
 
-- **Prefix**: `Ctrl + \`
-- The rest of the keybindings remain unchanged from the default Tmux configuration.
+```bash
+tmux
+```
+
+Prefix is set to `Ctrl + A`.
+
+---
+
+## Hyprland Configuration
+
+Hyprland is a Wayland compositor for tiling and dynamic effects.
+
+> ⚠️ Hyprland is only supported on Arch-based distros.
+
+### Features:
+
+* Blur behind transparent windows
+* Kitty opacity rules
+* Minimal workspace-only animations
+
+---
+
+## Zsh Configuration
+
+Zsh is configured using Oh My Zsh and Powerlevel10k.
+
+### Setup Steps:
+
+1. Make Zsh the default shell:
+
+   ```bash
+   chsh -s $(which zsh)
+   ```
+
+2. Install Oh My Zsh:
+
+   ```bash
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+   ```
+
+3. Run Powerlevel10k wizard:
+
+   ```bash
+   p10k configure
+   ```
+
+Zsh configuration includes autosuggestions, syntax highlighting, and custom themes.
 
 ---
 
 ## Contributing
 
 If you find any issues with these configurations or have suggestions for improvements, please open an issue or submit a pull request.
+
