@@ -216,6 +216,28 @@ local function setup_lspconfig()
       }
     }
   })
+
+  -- Rust LSP configuration
+  lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", base_config, {
+    settings = {
+      ["rust-analyzer"] = {
+        imports = {
+          granularity = {
+            group = "module",
+          },
+          prefix = "self",
+        },
+        cargo = {
+          buildScripts = {
+            enable = true,
+          },
+        },
+        procMacro = {
+          enable = true
+        },
+      },
+    },
+  }))
 end
 
 -- Call the setup function
