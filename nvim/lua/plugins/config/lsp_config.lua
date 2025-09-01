@@ -116,29 +116,21 @@ local function setup_lspconfig()
       pylsp = {
         plugins = {
           -- Formatting
-          black = { enabled = false },
-          autopep8 = { enabled = false },
-          yapf = { enabled = false },
+          black           = { enabled = false },
+          autopep8        = { enabled = false },
+          yapf            = { enabled = false },
 
           -- Linting
-          pylint = {
-            enabled = false,
-            executable = "pylint",
-            args = {
-              "--disable=no-member",
-              "--disable=C0111", -- Missing docstring
-              "--disable=C0103", -- Invalid name
-            },
-          },
-          pyflakes = { enabled = false },
-          pycodestyle = { enabled = false },
+          pylint          = { enabled = false },
+          pyflakes        = { enabled = false },
+          pycodestyle     = { enabled = false },
 
           -- Type checking
-          pylsp_mypy = {
+          pylsp_mypy      = {
             enabled = true,
             overrides = { "--python-executable", get_python_path(), true },
             report_progress = true,
-            live_mode = false,
+            live_mode = true,
             strict = true
           },
 
@@ -149,7 +141,7 @@ local function setup_lspconfig()
           },
 
           -- Import sorting
-          isort = { enabled = false },
+          isort           = { enabled = false },
 
           -- Additional features
           rope_completion = { enabled = true },
@@ -198,7 +190,7 @@ local function setup_lspconfig()
   }))
 
   -- Ruff LSP configuration
-  require('lspconfig').ruff.setup({
+  lspconfig.ruff.setup({
     init_options = {
       settings = {
         lint = {
