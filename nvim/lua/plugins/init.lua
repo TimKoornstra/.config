@@ -86,24 +86,6 @@ packer.startup {
       end,
     }
 
-    -- LSP and completion
-    use {
-      "williamboman/mason.nvim",
-      config = function()
-        require("mason").setup()
-      end,
-    }
-    use {
-      "williamboman/mason-lspconfig.nvim",
-      requires = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
-    }
-    use {
-      "neovim/nvim-lspconfig",
-      config = get_config("lsp_config"),
-      dependencies = "saghen/blink.cmp",
-    }
-    use { "microsoft/python-type-stubs", opt = true }
-
     -- Snippets and completion
     use {
       "saghen/blink.cmp",
@@ -111,6 +93,24 @@ packer.startup {
       tag = "*",
       requires = { "rafamadriz/friendly-snippets" }
     }
+
+    -- LSP
+    use {
+      "mason-org/mason.nvim",
+      config = function()
+        require("mason").setup()
+      end,
+    }
+    use {
+      "neovim/nvim-lspconfig",
+      config = get_config("lsp_config"),
+      requires = "saghen/blink.cmp",
+    }
+    use {
+      "mason-org/mason-lspconfig.nvim",
+      requires = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+    }
+    use { "microsoft/python-type-stubs", opt = true }
 
     -- Git integration
     use {

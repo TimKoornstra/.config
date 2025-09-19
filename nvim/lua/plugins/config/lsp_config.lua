@@ -1,18 +1,10 @@
--- Helper function to get python path
-local function get_python_path()
-  local conda_prefix = os.getenv('CONDA_PREFIX')
-  local venv_prefix = os.getenv('VIRTUAL_ENV')
+-- This file contains general shared settings for LSPs
+-- For LSP-specific settings, see `~/.config/nvim/after/lsp/`
+local ok, blink = pcall(require, "blink.cmp")
+local capabilities = ok and blink.get_lsp_capabilities()
+    or vim.lsp.protocol.make_client_capabilities()
 
-  if conda_prefix then
-    return conda_prefix .. "/bin/python3"
-  elseif venv_prefix then
-    return venv_prefix .. "/bin/python3"
-  else
-    return vim.g.python3_host_prog
-  end
-end
-
--- Enhanced keybindings setup
+-- Keybindings per-buffer
 local function setup_keybindings(bufnr)
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
   local map = vim.keymap.set
@@ -36,12 +28,6 @@ local function setup_keybindings(bufnr)
   map("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float()<CR>", bufopts)
   map("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>", bufopts)
   map("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>", bufopts)
-  map("n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", bufopts)
-
-  -- Workspace
-  map("n", "<leader>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
-  map("n", "<leader>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
-  map("n", "<leader>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", bufopts)
 end
 
 -- From: https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization#show-line-diagnostics-automatically-in-hover-window
@@ -63,174 +49,46 @@ local function setup_diagnostics(bufnr)
   })
 end
 
--- Common LSP setup function
-local function make_config()
-  local capabilities = require("blink.cmp").get_lsp_capabilities()
-
-  local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+-- Rounded borders everywhere
+do
+  local orig = vim.lsp.util.open_floating_preview
   function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
     opts = opts or {}
     opts.border = opts.border or 'rounded'
-    return orig_util_open_floating_preview(contents, syntax, opts, ...)
+    return orig(contents, syntax, opts, ...)
   end
+end
 
-  -- Configure diagnostic style
-  vim.diagnostic.config({
-    float = { border = 'rounded' },
-    virtual_text = true,
-    signs = true,
-    underline = true,
-    update_in_insert = false,
-    severity_sort = true,
-  })
+-- Global diagnostic look
+vim.diagnostic.config({
+  float = { border = 'rounded' },
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+})
 
-  return {
-    capabilities = capabilities,
-    flags = {
-      debounce_text_changes = 200,
-    },
-    on_attach = function(client, bufnr)
-      setup_keybindings(bufnr)
-      setup_diagnostics(bufnr)
+-- Shared defaults for all LSP clients
+vim.lsp.config('*', {
+  capabilities = capabilities,
+  flags = { debounce_text_changes = 200 },
 
-      -- Enable formatting on save if the client supports it
-      if client.server_capabilities.documentFormattingProvider then
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          buffer = bufnr,
-          callback = function()
-            vim.lsp.buf.format({ bufnr = bufnr })
-          end,
-        })
-      end
+  -- This runs for any server that attaches
+  on_attach = function(client, bufnr)
+    setup_keybindings(bufnr)
+    setup_diagnostics(bufnr)
+
+    -- Enable formatting on save if the client supports it
+    if client.server_capabilities.documentFormattingProvider then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = bufnr })
+        end,
+      })
     end
-  }
-end
+  end,
+})
 
-local function setup_lspconfig()
-  local lspconfig = require("lspconfig")
-  local base_config = make_config()
-
-  -- Python LSP configuration
-  lspconfig.pylsp.setup(vim.tbl_deep_extend("force", base_config, {
-    settings = {
-      pylsp = {
-        plugins = {
-          -- Formatting
-          black           = { enabled = false },
-          autopep8        = { enabled = false },
-          yapf            = { enabled = false },
-
-          -- Linting
-          pylint          = { enabled = false },
-          pyflakes        = { enabled = false },
-          pycodestyle     = { enabled = false },
-
-          -- Type checking
-          pylsp_mypy      = {
-            enabled = true,
-            overrides = { "--python-executable", get_python_path(), true },
-            report_progress = true,
-            live_mode = true,
-            strict = true
-          },
-
-          -- Completion
-          jedi_completion = {
-            fuzzy = true,
-            include_params = true
-          },
-
-          -- Import sorting
-          isort           = { enabled = false },
-
-          -- Additional features
-          rope_completion = { enabled = true },
-          rope_autoimport = { enabled = true }
-        },
-      },
-    },
-  }))
-
-  -- TypeScript LSP configuration
-  lspconfig.ts_ls.setup(vim.tbl_deep_extend("force", base_config, {
-    settings = {
-      typescript = {
-        inlayHints = {
-          includeInlayParameterNameHints = 'all',
-          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-          includeInlayFunctionParameterTypeHints = true,
-          includeInlayVariableTypeHints = true,
-          includeInlayPropertyDeclarationTypeHints = true,
-          includeInlayFunctionLikeReturnTypeHints = true,
-          includeInlayEnumMemberValueHints = true,
-        }
-      }
-    }
-  }))
-
-  -- ESLint LSP configuration
-  lspconfig.eslint.setup({ base_config })
-
-  -- Lua LSP configuration
-  lspconfig.lua_ls.setup(vim.tbl_deep_extend("force", base_config, {
-    settings = {
-      Lua = {
-        diagnostics = {
-          globals = { 'vim' }
-        },
-        workspace = {
-          library = vim.api.nvim_get_runtime_file("", true),
-          checkThirdParty = false,
-        },
-        telemetry = {
-          enable = false,
-        },
-      },
-    },
-  }))
-
-  -- Ruff LSP configuration
-  lspconfig.ruff.setup({
-    init_options = {
-      settings = {
-        lint = {
-          select = {
-            "F",      -- pyflakes
-            "E", "W", -- pycodestyle
-            "PL",     -- pylint
-            "I",      -- isort
-          },
-          ignore = {
-            "E501", "E741", "F402", "F823", "PLR0913", "PLR0911",
-            "PLR0912", "PLR0915", "PLW2901", "PLW0603"
-          },
-        },
-      }
-    }
-  })
-
-  -- Rust LSP configuration
-  lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", base_config, {
-    settings = {
-      ["rust-analyzer"] = {
-        imports = {
-          granularity = {
-            group = "module",
-          },
-          prefix = "self",
-        },
-        cargo = {
-          buildScripts = {
-            enable = true,
-          },
-        },
-        procMacro = {
-          enable = true
-        },
-      },
-    },
-  }))
-end
-
--- Call the setup function
-setup_lspconfig()
+vim.lsp.enable({ "pylsp", "ruff", "lua_ls", "ts_ls", "eslint", "rust_analyzer" })
