@@ -106,10 +106,6 @@ packer.startup {
       config = get_config("lsp_config"),
       requires = "saghen/blink.cmp",
     }
-    use {
-      "mason-org/mason-lspconfig.nvim",
-      requires = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
-    }
     use { "microsoft/python-type-stubs", opt = true }
 
     -- Git integration

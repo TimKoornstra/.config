@@ -4,50 +4,72 @@ local ok, blink = pcall(require, "blink.cmp")
 local capabilities = ok and blink.get_lsp_capabilities()
     or vim.lsp.protocol.make_client_capabilities()
 
--- Keybindings per-buffer
-local function setup_keybindings(bufnr)
-  local bufopts = { noremap = true, silent = true, buffer = bufnr }
-  local map = vim.keymap.set
+-- Keymaps on LspAttach (runs for every client that attaches)
+local lsp_group = vim.api.nvim_create_augroup("UserLspKeymaps", { clear = true })
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = lsp_group,
+  callback = function(args)
+    local bufnr = args.buf
+    local map = function(mode, lhs, rhs)
+      vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, buffer = bufnr })
+    end
 
-  -- Navigation
-  map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", bufopts)
-  map("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
-  map("n", "gr", require("telescope.builtin").lsp_references, bufopts)
-  map("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
-  map("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", bufopts)
+    -- Navigation
+    map("n", "gd", vim.lsp.buf.definition)
+    map("n", "gi", vim.lsp.buf.implementation)
+    map("n", "gD", vim.lsp.buf.declaration)
+    map("n", "gt", vim.lsp.buf.type_definition)
 
-  -- Documentation
-  map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", bufopts)
-  map("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", bufopts)
+    -- References via Telescope (lazy-require so it works even if not loaded yet)
+    map("n", "gr", function() require("telescope.builtin").lsp_references() end)
 
-  -- Refactoring
-  map("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", bufopts)
-  map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", bufopts)
+    -- Docs / Sig-help
+    map("n", "K", vim.lsp.buf.hover)
+    map("n", "<C-k>", vim.lsp.buf.signature_help)
 
-  -- Diagnostics
-  map("n", "<leader>e", "<cmd>lua vim.diagnostic.open_float()<CR>", bufopts)
-  map("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>", bufopts)
-  map("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>", bufopts)
-end
+    -- Refactor
+    map("n", "<leader>rn", vim.lsp.buf.rename)
+    map("n", "<leader>ca", vim.lsp.buf.code_action)
 
--- From: https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization#show-line-diagnostics-automatically-in-hover-window
-local function setup_diagnostics(bufnr)
-  vim.api.nvim_create_autocmd("CursorHold", {
-    buffer = bufnr,
-    callback = function()
-      local float_opts = {
-        focusable = false,
-        close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-        border = "rounded",
-        source = "always", -- show source in diagnostic popup window
-        prefix = " ",
-        scope = 'cursor',
-      }
+    -- Diagnostics
+    map("n", "<leader>e", vim.diagnostic.open_float)
+    map("n", "]d", function()
+      vim.diagnostic.jump({ count = 1, float = true })
+    end)
 
-      vim.diagnostic.open_float(nil, float_opts)
-    end,
-  })
-end
+    map("n", "[d", function()
+      vim.diagnostic.jump({ count = -1, float = true })
+    end)
+
+    -- Format on save if the server supports it
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.server_capabilities.documentFormattingProvider then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = bufnr })
+        end,
+      })
+    end
+
+    -- Diagnostics settings
+    vim.api.nvim_create_autocmd("CursorHold", {
+      buffer = bufnr,
+      callback = function()
+        local float_opts = {
+          focusable = false,
+          close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+          border = "rounded",
+          source = "always", -- show source in diagnostic popup window
+          prefix = " ",
+          scope = 'cursor',
+        }
+
+        vim.diagnostic.open_float(nil, float_opts)
+      end,
+    })
+  end,
+})
 
 -- Rounded borders everywhere
 do
@@ -73,22 +95,6 @@ vim.diagnostic.config({
 vim.lsp.config('*', {
   capabilities = capabilities,
   flags = { debounce_text_changes = 200 },
-
-  -- This runs for any server that attaches
-  on_attach = function(client, bufnr)
-    setup_keybindings(bufnr)
-    setup_diagnostics(bufnr)
-
-    -- Enable formatting on save if the client supports it
-    if client.server_capabilities.documentFormattingProvider then
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format({ bufnr = bufnr })
-        end,
-      })
-    end
-  end,
 })
 
 vim.lsp.enable({ "pylsp", "ruff", "lua_ls", "ts_ls", "eslint", "rust_analyzer" })
