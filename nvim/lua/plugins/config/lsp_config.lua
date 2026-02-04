@@ -97,4 +97,4 @@ vim.lsp.config('*', {
   flags = { debounce_text_changes = 200 },
 })
 
-vim.lsp.enable({ "pylsp", "ruff", "lua_ls", "ts_ls", "eslint", "rust_analyzer" })
+vim.lsp.enable({ "ty", "ruff", "lua_ls", "ts_ls", "eslint", "rust_analyzer" })

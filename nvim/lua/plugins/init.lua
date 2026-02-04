@@ -136,12 +136,6 @@ packer.startup {
       config = function() require("nvim-autopairs").setup {} end,
     }
 
-    -- Buffer navigation
-    use {
-      "folke/flash.nvim",
-      config = function() require("flash").setup {} end
-    }
-
     install_sync()
   end,
   config = {},
